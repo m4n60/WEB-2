@@ -75,6 +75,23 @@ function marcarTareaCompletada( ){
     }
 }   
 
+
+// Función para eliminar tarea
+function eliminarTarea(){
+    if(tareas.length === 0){
+        alert("No se puede eliminar si no hay tareas");
+        return;
+    }
+
+    let numero = parseInt(prompt("Introduce el número de la tarea que deseas eliminar"));
+    if(numero > 0 && numero <= tareas.length){
+        let tareaEliminada = tareas.splice(numero - 1, 1);
+        alert(`La tarea "${tareaEliminada[0].nombre}" ha sido eliminada.`);
+    } else {
+        alert("Número de tarea no reconocido ");
+    }
+}
+
 // funcion para manejar el flujo de nuestro programa
 function iniciarPrograma(){
     let continuar = true;
