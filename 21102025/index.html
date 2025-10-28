@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Juego del Gato</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #f0f0f0;
+    }
+    h1 {
+      color: #333;
+    }
+    #tablero {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      grid-template-rows: repeat(3, 100px);
+      gap: 5px;
+      justify-content: center;
+      margin: 20px auto;
+    }
+    .celda {
+      background-color: white;
+      border: 2px solid #333;
+      font-size: 2em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .celda:hover {
+      background-color: #dcdcdc;
+    }
+    #mensaje {
+      font-size: 1.2em;
+      margin-top: 10px;
+    }
+    button {
+      margin-top: 15px;
+      padding: 8px 16px;
+      font-size: 1em;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>Juego del Gato</h1>
+  <div id="tablero"></div>
+  <div id="mensaje"></div>
+  <button onclick="reiniciar()">Reiniciar</button>
+
+  <!-- Conectamos el archivo JS -->
+  <script src="./app.js"></script>
+</body>
+</html>

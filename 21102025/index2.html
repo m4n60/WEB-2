@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generador QR</title>
+  <style>
+    :root {
+      --bg1: #020617;
+      --bg2: #0a0f29;
+      --accent: #00d4ff;
+      --accent-glow: rgba(0, 212, 255, 0.4);
+      --text: #e0e6ff;
+      --input-bg: #0f173a;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Orbitron', sans-serif;
+      letter-spacing: 1px;
+    }
+
+    body {
+      background: radial-gradient(circle at top, var(--bg2), var(--bg1));
+      color: var(--text);
+      min-height: 100vh;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow-x: hidden;
+    }
+
+    h1 {
+      font-size: 2rem;
+      text-shadow: 0 0 15px var(--accent);
+      margin-bottom: 20px;
+    }
+
+    div {
+      margin: 10px 0;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: 600;
+      color: var(--accent);
+      text-shadow: 0 0 5px var(--accent-glow);
+    }
+
+    input, datalist {
+      width: 100%;
+      max-width: 300px;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid var(--accent);
+      border-radius: 10px;
+      background-color: var(--input-bg);
+      color: var(--text);
+      outline: none;
+      transition: 0.3s ease;
+      box-shadow: 0 0 10px transparent;
+    }
+
+    input:focus {
+      box-shadow: 0 0 10px var(--accent);
+      border-color: var(--accent);
+    }
+
+    button {
+      margin: 10px;
+      padding: 10px 25px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 20px;
+      background: linear-gradient(90deg, var(--accent), #0080ff);
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 0 15px var(--accent-glow);
+      transition: 0.3s ease;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 25px var(--accent);
+    }
+
+    #qr-code {
+      margin-top: 30px;
+      padding: 20px;
+      border: 2px dashed var(--accent);
+      border-radius: 15px;
+      background: rgba(255, 255, 255, 0.05);
+      box-shadow: inset 0 0 25px var(--accent-glow);
+      animation: glowPulse 2.5s infinite alternate;
+    }
+
+    @keyframes glowPulse {
+      from { box-shadow: 0 0 10px var(--accent-glow); }
+      to { box-shadow: 0 0 30px var(--accent); }
+    }
+
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap');
+  </style>
+</head>
+<body>
+
+  <h1>Código QR</h1>
+
+  <div>
+    <label for="input1">Nombre:</label>
+    <input type="text" id="input1" required maxlength="100" placeholder="Tu nombre completo">
+
+    <label for="input2">Correo:</label>
+    <input type="email" id="input2" placeholder="ejemplo@correo.com">
+
+    <label for="input3">Selecciona la institución:</label>
+    <input type="text" id="input3" list="institucionLista" required>
+    <datalist id="institucionLista">
+      <option value="FES Aragón">Facultad de Estudios Superiores Aragón</option>
+      <option value="IPN">Politécnico</option>
+      <option value="UVM">Universidad del Valle de México</option>
+    </datalist>
+
+    <label for="input4">Dependencia:</label>
+    <input type="text" id="input4" placeholder="Dependencia o área">
+  </div>
+
+  <div>
+    <button onclick="generarQR()">Generar QR</button>
+    <button onclick="location.href='./index2.html'">Nuevo QR</button>
+  </div>
+
+  <div id="qr-code"></div>
+
+  <script src="./app2.js"></script>
+</body>
+</html>
