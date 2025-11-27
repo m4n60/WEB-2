@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team MANGO | Gestión de Jugadores</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --color-mango-amarillo: #FFC300;
+            --color-mango-azul: #003366;
+            --color-mango-negro: #1a1a1a;
+            --color-mango-gris: #f0f0f0;
+        }
+
+        .bg-mango-amarillo { background-color: var(--color-mango-amarillo); }
+        .text-mango-amarillo { color: var(--color-mango-amarillo); }
+        .hover\:bg-mango-amarillo-dark:hover { background-color: #e6b100; }
+        .focus\:ring-mango-amarillo:focus { --tw-ring-color: var(--color-mango-amarillo); }
+
+        .bg-mango-azul { background-color: var(--color-mango-azul); }
+        .text-mango-azul { color: var(--color-mango-azul); }
+        .hover\:bg-mango-azul-dark:hover { background-color: #002d5a; }
+
+        .bg-mango-negro { background-color: var(--color-mango-negro); }
+        .text-mango-negro { color: var(--color-mango-negro); }
+
+        .fade-in { animation: fadeIn 0.6s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .editing-card { 
+            background-color: #fffde7 !important;
+            border: 2px solid var(--color-mango-azul) !important;
+            box-shadow: 0 0 15px rgba(0, 51, 102, 0.3) !important; 
+            transform: scale(1.02);
+            z-index: 10;
+        }
+
+        .player-card {
+            transition: all 0.2s ease-in-out;
+        }
+        .player-card:hover {
+            transform: translateY(-5px) scale(1.01);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+        }
+
+        .player-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .animate-volleyball-bounce {
+            animation: bounce-y 1.5s infinite ease-in-out;
+        }
+        @keyframes bounce-y {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        #player-count {
+            display: inline-block;
+            background-color: var(--color-mango-amarillo);
+            color: var(--color-mango-azul);
+            font-size: 1.5rem;
+            padding: 0.2rem 0.8rem;
+            border-radius: 9999px;
+            margin-left: 1rem;
+            font-weight: 900;
+        }
+
+    </style>
+</head>
+<body class="bg-mango-gris text-mango-negro font-sans h-screen flex flex-col">
+
+    <div id="login-view" class="fixed inset-0 z-50 bg-mango-azul flex items-center justify-center">
+        <div class="bg-white p-10 rounded-3xl shadow-3xl w-full max-w-sm fade-in text-center border-b-8 border-mango-amarillo transform hover:scale-[1.01] transition duration-300">
+            <div class="mb-8 text-mango-amarillo">
+                <i class="fas fa-volleyball-ball text-7xl animate-volleyball-bounce"></i>
+            </div>
+            <h2 class="text-4xl font-extrabold mb-8 text-mango-negro tracking-wide">Acceso a <span class="text-mango-azul">Team MANGO</span></h2>
+            <form onsubmit="app.login(event)" class="space-y-5">
+                <input type="text" name="usuario" placeholder="Usuario" class="w-full p-4 border-2 border-gray-300 rounded-lg focus:ring-5 focus:ring-mango-amarillo focus:border-mango-amarillo outline-none text-lg transition duration-200" required>
+                <input type="password" name="password" placeholder="Contraseña" class="w-full p-4 border-2 border-gray-300 rounded-lg focus:ring-5 focus:ring-mango-amarillo focus:border-mango-amarillo outline-none text-lg transition duration-200" required>
+                <button type="submit" class="w-full bg-mango-azul text-white py-3 rounded-xl font-bold text-xl hover:bg-mango-azul-dark transition shadow-lg hover:shadow-xl transform hover:scale-[1.02]">
+                    <i class="fas fa-sign-in-alt mr-3"></i> ENTRAR
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div id="app-view" class="hidden flex-1 flex flex-col h-full">
+        <nav class="bg-mango-azul shadow-2xl px-8 py-5 flex justify-between items-center z-10 sticky top-0">
+            <div class="flex items-center gap-4">
+                <i class="fas fa-volleyball-ball text-mango-amarillo text-3xl"></i>
+                <h1 class="font-black text-3xl tracking-wider text-white">Team MANGO</h1>
+            </div>
+            <button onclick="location.reload()" class="text-gray-300 hover:text-mango-amarillo font-medium text-lg transition duration-300 flex items-center gap-2">
+                <i class="fas fa-sign-out-alt"></i> Salir
+            </button>
+        </nav>
+
+        <main class="flex-1 p-10 overflow-auto bg-mango-gris">
+            <div class="max-w-7xl mx-auto fade-in">
+                <div class="flex justify-between items-center mb-8 pb-6 border-b-2 border-gray-200">
+                    <h2 class="text-4xl font-extrabold text-mango-azul">
+                        Plantilla Activa <span id="player-count">0</span>
+                    </h2>
+                    <button onclick="ui.toggleModal(true)" class="bg-mango-amarillo hover:bg-mango-amarillo-dark text-mango-azul px-7 py-3 rounded-full shadow-lg transition flex items-center gap-3 font-bold text-lg transform hover:scale-[1.05]">
+                        <i class="fas fa-user-plus"></i> Añadir Jugador
+                    </button>
+                </div>
+
+                <div id="players-container" class="player-grid">
+                    
+                </div>
+                <div id="loader" class="p-8 text-center text-gray-400 hidden text-xl font-semibold">Cargando datos del equipo...</div>
+            </div>
+        </main>
+    </div>
+
+    <div id="modal" class="fixed inset-0 bg-mango-negro/75 hidden items-center justify-center z-50 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-3xl w-full max-w-lg m-6 fade-in overflow-hidden border-b-8 border-mango-amarillo transform scale-100 transition duration-300">
+            <div class="bg-mango-azul text-white px-8 py-5 border-b flex justify-between items-center">
+                <h3 class="font-extrabold text-2xl">Nuevo Fichaje</h3>
+                <button onclick="ui.toggleModal(false)" class="text-gray-200 hover:text-mango-amarillo transition"><i class="fas fa-times text-xl"></i></button>
+            </div>
+            <form onsubmit="app.crear(event)" class="p-8 space-y-6">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 uppercase mb-2">Nombre Completo</label>
+                    <input type="text" name="nombre" class="w-full border-2 border-gray-300 p-3 rounded-lg focus:ring-4 focus:ring-mango-amarillo outline-none transition" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 uppercase mb-2">Email</label>
+                    <input type="email" name="email" class="w-full border-2 border-gray-300 p-3 rounded-lg focus:ring-4 focus:ring-mango-amarillo outline-none transition" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 uppercase mb-2">Posición</label>
+                    <select name="rol" class="w-full border-2 border-gray-300 p-3 rounded-lg bg-white focus:ring-4 focus:ring-mango-amarillo outline-none transition">
+                        <option value="Armador">Armador</option>
+                        <option value="Punta">Punta</option>
+                        <option value="Central">Central</option>
+                        <option value="Opuesto">Opuesto</option>
+                        <option value="Líbero">Líbero</option>
+                        <option value="Entrenador">Entrenador</option>
+                        <option value="Asistente">Asistente</option>
+                    </select>
+                </div>
+                <div class="pt-5 flex justify-end gap-4">
+                    <button type="button" onclick="ui.toggleModal(false)" class="px-6 py-2 text-gray-600 font-bold hover:bg-gray-100 rounded-lg transition">CANCELAR</button>
+                    <button type="submit" class="px-6 py-2 bg-mango-amarillo text-mango-azul rounded-lg hover:bg-mango-amarillo-dark font-extrabold shadow-md transition transform hover:scale-[1.02]">
+                        <i class="fas fa-save mr-2"></i> GUARDAR
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000/api';
+        
+        const POSICIONES_VALIDAS = ['Armador', 'Punta', 'Central', 'Opuesto', 'Líbero', 'Entrenador', 'Asistente'];
+
+        const app = {
+            async login(e) {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                const data = Object.fromEntries(formData);
+
+                try {
+                    const res = await fetch(`${API_URL}/login`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                    const result = await res.json();
+                    
+                    if (result.success) {
+                        document.getElementById('login-view').classList.add('hidden');
+                        document.getElementById('app-view').classList.remove('hidden');
+                        this.cargar();
+                    } else {
+                        alert(result.message);
+                    }
+                } catch (error) {
+                    alert('Error: No se pudo conectar con el servidor (server.js)');
+                }
+            },
+
+            async cargar() {
+                const loader = document.getElementById('loader');
+                loader.classList.remove('hidden');
+                const res = await fetch(`${API_URL}/usuarios`);
+                const datos = await res.json();
+                ui.renderPlayers(datos);
+                loader.classList.add('hidden');
+            },
+
+            async crear(e) {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                
+                try {
+                    const response = await fetch(`${API_URL}/usuarios`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(Object.fromEntries(formData))
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        alert("Error al guardar: " + JSON.stringify(errorData));
+                        return; 
+                    }
+
+                    ui.toggleModal(false);
+                    e.target.reset();
+                    this.cargar();
+                    alert("¡Jugador guardado correctamente!");
+
+                } catch (error) {
+                    console.error(error);
+                    alert("Error de conexión: Asegúrate de que 'node server.js' esté ejecutándose en la terminal negra.");
+                }
+            },
+
+            async eliminar(id) {
+                if(confirm('¿Seguro que deseas eliminar a este jugador de la plantilla?')) {
+                    await fetch(`${API_URL}/usuarios/${id}`, { method: 'DELETE' });
+                    this.cargar();
+                }
+            },
+
+            async guardarEdicion(id) {
+                const card = document.getElementById(`player-card-${id}`);
+                const nombre = card.querySelector(`#edit-nom-${id}`).value;
+                const email = card.querySelector(`#edit-eml-${id}`).value;
+                const rol = card.querySelector(`#edit-rol-${id}`).value;
+
+                await fetch(`${API_URL}/usuarios/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nombre, email, rol })
+                });
+                this.cargar(); 
+            }
+        };
+
+        const ui = {
+            toggleModal(show) {
+                const modal = document.getElementById('modal');
+                modal.classList.toggle('hidden', !show);
+                modal.classList.toggle('flex', show);
+            },
+
+            renderPlayers(usuarios) {
+                const container = document.getElementById('players-container');
+                container.innerHTML = ''; 
+                
+                document.getElementById('player-count').textContent = usuarios.length;
+
+
+                if (usuarios.length === 0) {
+                    container.innerHTML = '<p class="text-center text-gray-500 text-lg py-10 col-span-full">No hay jugadores en la plantilla. ¡Añade uno nuevo!</p>';
+                    return;
+                }
+
+                usuarios.forEach((u, index) => {
+                    const card = document.createElement('div');
+                    card.id = `player-card-${u.id}`;
+                    card.className = "player-card group bg-white rounded-xl shadow-md p-6 border border-gray-100 relative"; 
+                    card.innerHTML = this.getPlayerCardHTML(u, index + 1);
+                    container.appendChild(card);
+                });
+            },
+
+            getPlayerCardHTML(u, playerNumber) {
+                let rol_style = '';
+                let rol_display = u.rol;
+
+                if (!POSICIONES_VALIDAS.includes(u.rol)) {
+                    rol_display = 'Posición Desconocida';
+                    rol_style = 'bg-red-100 text-red-700';
+                } else {
+                    switch (u.rol) {
+                        case 'Armador': rol_style = 'bg-blue-100 text-blue-800'; break;
+                        case 'Punta': rol_style = 'bg-purple-100 text-purple-800'; break;
+                        case 'Central': rol_style = 'bg-green-100 text-green-800'; break;
+                        case 'Opuesto': rol_style = 'bg-pink-100 text-pink-800'; break;
+                        case 'Líbero': rol_style = 'bg-yellow-100 text-yellow-800'; break;
+                        case 'Entrenador': rol_style = 'bg-gray-200 text-gray-800'; break;
+                        case 'Asistente': rol_style = 'bg-gray-100 text-gray-700'; break;
+                    }
+                }
+
+                return `
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <div class="text-mango-azul font-black text-xl mb-1">${u.nombre}</div>
+                            <p class="text-gray-500 text-sm mb-4"><i class="fas fa-envelope mr-2"></i> ${u.email}</p>
+                        </div>
+                        <div class="flex gap-3 mt-1">
+                            <button onclick="ui.activarEdicion(${u.id}, '${u.nombre}', '${u.email}', '${u.rol}')" 
+                                    class="text-mango-azul hover:text-mango-amarillo transition text-lg p-1" title="Editar">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button onclick="app.eliminar(${u.id})" 
+                                    class="text-gray-400 hover:text-red-600 transition text-lg p-1" title="Eliminar">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between pt-2 border-t border-gray-100">
+                        <span class="${rol_style} px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">
+                            <i class="fas fa-user-tag mr-1"></i> ${rol_display}
+                        </span>
+                        <span class="text-mango-azul font-extrabold text-2xl">#${playerNumber}</span>
+                    </div>
+                `;
+            },
+
+            activarEdicion(id, nombre, email, rol) {
+                const card = document.getElementById(`player-card-${id}`);
+                card.classList.remove('player-card', 'group'); 
+                card.classList.add('editing-card');
+                
+                const options = POSICIONES_VALIDAS.map(p => 
+                    `<option value="${p}" ${rol === p ? 'selected' : ''}>${p}</option>`
+                ).join('');
+                
+                let rolDesconocidoOption = '';
+                if (!POSICIONES_VALIDAS.includes(rol)) {
+                    rolDesconocidoOption = `<option value="${rol}" selected>(${rol}) - Desconocida</option>`;
+                }
+
+                card.innerHTML = `
+                    <div class="mb-4">
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Nombre</label>
+                        <input id="edit-nom-${id}" value="${nombre}" class="w-full border-b-2 border-mango-azul bg-transparent focus:outline-none py-1 text-mango-negro font-semibold text-lg">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Email</label>
+                        <input id="edit-eml-${id}" value="${email}" class="w-full border-b-2 border-mango-azul bg-transparent focus:outline-none py-1 text-gray-700">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Posición</label>
+                        <select id="edit-rol-${id}" class="w-full border-b-2 border-mango-azul bg-transparent focus:outline-none py-1 text-sm text-gray-700">
+                            ${rolDesconocidoOption} 
+                            ${options}
+                        </select>
+                    </div>
+                    <div class="flex justify-end gap-3 mt-6">
+                        <button onclick="app.guardarEdicion(${id})" class="bg-mango-azul text-white px-4 py-2 rounded-lg shadow hover:bg-mango-azul-dark text-sm font-bold transition">GUARDAR</button>
+                        <button onclick="app.cargar()" class="text-gray-500 hover:text-red-500 px-4 py-2 rounded-lg text-sm font-bold transition">CANCELAR</button>
+                    </div>
+                `;
+            }
+        };
+    </script>
+</body>
+</html>
